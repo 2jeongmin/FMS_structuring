@@ -1,0 +1,298 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "전담시설물 평가 결과 스키마",
+  "description": "시설물의 안전관리 필요성 평가 결과를 구조화한 스키마",
+  "type": "object",
+  "required": ["facility_info", "scoring_result", "evaluation_date"],
+  "properties": {
+    "facility_info": {
+      "type": "object",
+      "description": "평가 대상 시설물의 기본 정보",
+      "required": [
+        "facility_type",
+        "scale",
+        "safety_grade",
+        "years_in_service",
+        "has_critical_defect_history",
+        "repair_history_count",
+        "location",
+        "has_alternative",
+        "is_security_facility",
+        "is_critical_infrastructure",
+        "new_tech_applicable",
+        "special_structure"
+      ],
+      "properties": {
+        "facility_name": {
+          "type": "string",
+          "description": "시설물 명칭"
+        },
+        "facility_number": {
+          "type": "string",
+          "description": "시설물 번호 (예: BR1973-0000008)"
+        },
+        "facility_type": {
+          "type": "string",
+          "description": "시설물 종류",
+          "examples": ["도로교량", "철도교량", "터널", "댐", "건축물"]
+        },
+        "facility_classification": {
+          "type": "string",
+          "description": "시설물 등급",
+          "enum": ["제1종 시설물", "제2종 시설물", "제3종 시설물"]
+        },
+        "location_detail": {
+          "type": "string",
+          "description": "시설물 상세 위치"
+        },
+        "management_organization": {
+          "type": "string",
+          "description": "관리주체"
+        },
+        "construction_date": {
+          "type": "string",
+          "format": "date",
+          "description": "준공일 (YYYY-MM-DD)"
+        },
+        "scale": {
+          "type": "object",
+          "description": "시설물 규모",
+          "properties": {
+            "total_length": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"}
+              }
+            },
+            "max_span": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"}
+              }
+            },
+            "area": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"}
+              }
+            },
+            "height": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"}
+              }
+            },
+            "width": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"}
+              }
+            }
+          }
+        },
+        "safety_grade": {
+          "type": "string",
+          "description": "안전등급",
+          "enum": ["A", "B", "C", "D", "E"]
+        },
+        "years_in_service": {
+          "type": "integer",
+          "description": "공용년수 (준공 이후 경과 연수)",
+          "minimum": 0
+        },
+        "has_critical_defect_history": {
+          "type": "boolean",
+          "description": "중대결함 발생 이력 여부"
+        },
+        "critical_defect_details": {
+          "type": "array",
+          "description": "중대결함 상세 내용",
+          "items": {"type": "string"}
+        },
+        "repair_history_count": {
+          "type": "integer",
+          "description": "주요부재 보수보강 이력 횟수",
+          "minimum": 0
+        },
+        "repair_history_summary": {
+          "type": "string",
+          "description": "보수보강 이력 요약"
+        },
+        "location": {
+          "type": "string",
+          "description": "지리적 위치 분류",
+          "enum": ["서울특별시/광역시", "그 외"]
+        },
+        "has_alternative": {
+          "type": "boolean",
+          "description": "대체 시설물 존재 여부"
+        },
+        "alternative_facility_info": {
+          "type": "string",
+          "description": "대체 시설물 정보"
+        },
+        "is_security_facility": {
+          "type": "boolean",
+          "description": "보안시설물 해당 여부"
+        },
+        "is_critical_infrastructure": {
+          "type": "boolean",
+          "description": "국가핵심기반시설 해당 여부"
+        },
+        "new_tech_applicable": {
+          "type": "boolean",
+          "description": "안전점검 신기술 적용 가능성"
+        },
+        "new_tech_details": {
+          "type": "string",
+          "description": "적용 가능한 신기술 상세"
+        },
+        "special_structure": {
+          "type": "boolean",
+          "description": "신형식/신공법 적용 특수 구조물 여부"
+        },
+        "special_structure_details": {
+          "type": "string",
+          "description": "특수 구조물 상세 설명"
+        }
+      }
+    },
+    "scoring_result": {
+      "type": "object",
+      "description": "평가 점수 산출 결과",
+      "required": [
+        "functionality_score",
+        "risk_score",
+        "publicness_score",
+        "security_score",
+        "new_tech_score",
+        "total_score"
+      ],
+      "properties": {
+        "functionality_score": {
+          "type": "number",
+          "description": "기능성 점수",
+          "minimum": 0,
+          "maximum": 25
+        },
+        "functionality_breakdown": {
+          "type": "object",
+          "properties": {
+            "scale_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 15
+            },
+            "scale_evaluation": {"type": "string"},
+            "special_features_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "special_features_evaluation": {"type": "string"}
+          }
+        },
+        "risk_score": {
+          "type": "number",
+          "description": "위험성 점수",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "risk_evaluation": {
+          "type": "string",
+          "description": "위험성 평가 근거"
+        },
+        "publicness_score": {
+          "type": "number",
+          "description": "공공성 점수",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "publicness_evaluation": {
+          "type": "string",
+          "description": "공공성 평가 근거"
+        },
+        "security_score": {
+          "type": "number",
+          "description": "보안성 점수",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "security_evaluation": {
+          "type": "string",
+          "description": "보안성 평가 근거"
+        },
+        "new_tech_score": {
+          "type": "number",
+          "description": "신기술성 점수",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "new_tech_evaluation": {
+          "type": "string",
+          "description": "신기술성 평가 근거"
+        },
+        "total_score": {
+          "type": "number",
+          "description": "총점",
+          "minimum": 0,
+          "maximum": 70
+        },
+        "total_score_out_of": {
+          "type": "number",
+          "description": "만점 기준",
+          "const": 70
+        },
+        "evaluation_grade": {
+          "type": "string",
+          "description": "종합 평가 등급",
+          "enum": ["상", "중", "하"]
+        },
+        "evaluation_summary": {
+          "type": "string",
+          "description": "종합 평가 요약"
+        }
+      }
+    },
+    "recommendations": {
+      "type": "object",
+      "description": "권고사항",
+      "properties": {
+        "priority": {
+          "type": "string",
+          "description": "관리 우선순위",
+          "enum": ["최우선", "우선", "중순위", "일반"]
+        },
+        "suggested_actions": {
+          "type": "array",
+          "description": "권장 조치사항",
+          "items": {"type": "string"}
+        },
+        "notes": {
+          "type": "array",
+          "description": "참고사항",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "evaluation_date": {
+      "type": "string",
+      "format": "date",
+      "description": "평가일 (YYYY-MM-DD)"
+    },
+    "evaluation_criteria_version": {
+      "type": "string",
+      "description": "적용한 평가기준 버전"
+    },
+    "data_sources": {
+      "type": "array",
+      "description": "데이터 출처",
+      "items": {"type": "string"}
+    }
+  }
+}
