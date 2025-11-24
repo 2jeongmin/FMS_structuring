@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "전담시설물 평가 결과 스키마",
-  "description": "시설물의 안전관리 필요성 평가 결과를 구조화한 스키마",
+  "title": "전담시설물 평가 결과 스키마 (최종)",
+  "description": "시설물의 안전관리 필요성 및 관리주체 역량 평가 결과 - 2025.11.19 최종 수정",
   "type": "object",
   "required": ["facility_info", "scoring_result", "evaluation_date"],
   "properties": {
@@ -13,10 +13,7 @@
         "scale",
         "safety_grade",
         "years_in_service",
-        "has_critical_defect_history",
-        "repair_history_count",
-        "location",
-        "has_alternative",
+        "critical_defect_count",
         "is_security_facility",
         "is_critical_infrastructure",
         "new_tech_applicable",
@@ -34,7 +31,7 @@
         "facility_type": {
           "type": "string",
           "description": "시설물 종류",
-          "examples": ["도로교량", "철도교량", "터널", "댐", "건축물"]
+          "examples": ["도로교량", "철도교량", "터널", "댐", "건축물", "상하수도", "하천", "항만", "옹벽", "절토사면", "공동구"]
         },
         "facility_classification": {
           "type": "string",
@@ -43,7 +40,7 @@
         },
         "location_detail": {
           "type": "string",
-          "description": "시설물 상세 위치"
+          "description": "시설물 상세 위치 (시/도, 시/군/구)"
         },
         "management_organization": {
           "type": "string",
@@ -56,7 +53,7 @@
         },
         "scale": {
           "type": "object",
-          "description": "시설물 규모",
+          "description": "시설물 규모 (시설물 유형별로 1~2개 기준)",
           "properties": {
             "total_length": {
               "type": "object",
@@ -92,49 +89,90 @@
                 "value": {"type": "number"},
                 "unit": {"type": "string"}
               }
+            },
+            "capacity": {
+              "type": "object",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"}
+              }
+            },
+            "lanes": {
+              "type": "integer",
+              "description": "차로수 (터널)"
             }
           }
         },
         "safety_grade": {
           "type": "string",
-          "description": "안전등급",
+          "description": "현재 안전등급",
           "enum": ["A", "B", "C", "D", "E"]
+        },
+        "safety_grade_history": {
+          "type": "array",
+          "description": "안전등급 변화 이력 (최근 10년)",
+          "items": {
+            "type": "object",
+            "properties": {
+              "year": {"type": "integer"},
+              "grade": {"type": "string", "enum": ["A", "B", "C", "D", "E"]}
+            }
+          }
         },
         "years_in_service": {
           "type": "integer",
           "description": "공용년수 (준공 이후 경과 연수)",
           "minimum": 0
         },
-        "has_critical_defect_history": {
-          "type": "boolean",
-          "description": "중대결함 발생 이력 여부"
+        "climate_change_data": {
+          "type": "object",
+          "description": "기후변화 시나리오 기반 극한 강우 데이터",
+          "properties": {
+            "rcp60_extreme_rainfall": {
+              "type": "object",
+              "description": "RCP6.0 시나리오 극한 강우 강도",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"},
+                "is_above_average": {"type": "boolean"},
+                "increase_rate": {"type": "number", "description": "증가율 (%)"}
+              }
+            },
+            "ssp245_extreme_rainfall": {
+              "type": "object",
+              "description": "SSP2-4.5 시나리오 극한 강우 강도",
+              "properties": {
+                "value": {"type": "number"},
+                "unit": {"type": "string"},
+                "is_above_average": {"type": "boolean"},
+                "increase_rate": {"type": "number", "description": "증가율 (%)"}
+              }
+            }
+          }
+        },
+        "critical_defect_count": {
+          "type": "integer",
+          "description": "반복적인 중대결함 발생 총 횟수",
+          "minimum": 0
         },
         "critical_defect_details": {
           "type": "array",
           "description": "중대결함 상세 내용",
           "items": {"type": "string"}
         },
-        "repair_history_count": {
-          "type": "integer",
-          "description": "주요부재 보수보강 이력 횟수",
-          "minimum": 0
-        },
-        "repair_history_summary": {
-          "type": "string",
-          "description": "보수보강 이력 요약"
-        },
-        "location": {
-          "type": "string",
-          "description": "지리적 위치 분류",
-          "enum": ["서울특별시/광역시", "그 외"]
-        },
-        "has_alternative": {
-          "type": "boolean",
-          "description": "대체 시설물 존재 여부"
-        },
-        "alternative_facility_info": {
-          "type": "string",
-          "description": "대체 시설물 정보"
+        "population_data": {
+          "type": "object",
+          "description": "시설물 소재지 인구 데이터",
+          "properties": {
+            "city_population": {
+              "type": "integer",
+              "description": "시/도 단위 인구수"
+            },
+            "district_population_density": {
+              "type": "number",
+              "description": "시/군/구 단위 인구밀도 (명/km²)"
+            }
+          }
         },
         "is_security_facility": {
           "type": "boolean",
@@ -159,6 +197,42 @@
         "special_structure_details": {
           "type": "string",
           "description": "특수 구조물 상세 설명"
+        },
+        "management_compliance_data": {
+          "type": "object",
+          "description": "관리주체 법정 의무 이행 데이터 (최근 5년)",
+          "properties": {
+            "inspection_compliance": {
+              "type": "object",
+              "description": "점검/진단/성능평가 이행 현황",
+              "properties": {
+                "on_time_count": {"type": "integer", "description": "기한 내 제출 건수"},
+                "delayed_count": {"type": "integer", "description": "지연 제출 건수"},
+                "not_submitted_count": {"type": "integer", "description": "미제출 또는 미이행 건수"}
+              }
+            },
+            "management_plan_compliance": {
+              "type": "object",
+              "description": "시설물관리계획서 제출 현황",
+              "properties": {
+                "on_time_count": {"type": "integer", "description": "기한 내 제출 건수"},
+                "delayed_count": {"type": "integer", "description": "지연 제출 건수"},
+                "not_submitted_count": {"type": "integer", "description": "미제출 건수"}
+              }
+            }
+          }
+        },
+        "report_quality_data": {
+          "type": "object",
+          "description": "보고서 품질 평가 데이터 (최근 5년)",
+          "properties": {
+            "total_reports": {"type": "integer", "description": "전체 보고서 수"},
+            "inadequate_reports": {"type": "integer", "description": "부적정 보고서 수"},
+            "inadequacy_rate": {"type": "number", "description": "부적정률 (%)"},
+            "corrected_reports": {"type": "integer", "description": "시정 완료 보고서 수"},
+            "uncorrected_reports": {"type": "integer", "description": "미시정 보고서 수"},
+            "correction_rate": {"type": "number", "description": "시정률 (%)"}
+          }
         }
       }
     },
@@ -171,57 +245,71 @@
         "publicness_score",
         "security_score",
         "new_tech_score",
+        "total_score_a",
+        "compliance_score",
+        "quality_score",
+        "total_score_b",
         "total_score"
       ],
       "properties": {
         "functionality_score": {
           "type": "number",
-          "description": "기능성 점수",
+          "description": "기능성 점수 (상대평가)",
           "minimum": 0,
-          "maximum": 25
+          "maximum": 15
         },
-        "functionality_breakdown": {
-          "type": "object",
-          "properties": {
-            "scale_score": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 15
-            },
-            "scale_evaluation": {"type": "string"},
-            "special_features_score": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 10
-            },
-            "special_features_evaluation": {"type": "string"}
-          }
+        "functionality_evaluation": {
+          "type": "string",
+          "description": "기능성 평가 근거 및 순위 정보"
         },
         "risk_score": {
           "type": "number",
-          "description": "위험성 점수",
+          "description": "위험성 총점",
           "minimum": 0,
-          "maximum": 10
+          "maximum": 40
         },
-        "risk_evaluation": {
-          "type": "string",
-          "description": "위험성 평가 근거"
+        "risk_breakdown": {
+          "type": "object",
+          "description": "위험성 세부 점수",
+          "properties": {
+            "disaster_possibility_score": {
+              "type": "number",
+              "description": "재난발생 가능성",
+              "minimum": 0,
+              "maximum": 15
+            },
+            "disaster_possibility_evaluation": {"type": "string"},
+            "safety_grade_change_score": {
+              "type": "number",
+              "description": "안전등급 변화 추이",
+              "minimum": 0,
+              "maximum": 15
+            },
+            "safety_grade_change_evaluation": {"type": "string"},
+            "repeated_critical_defect_score": {
+              "type": "number",
+              "description": "반복적인 중대결함 발생 이력",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "repeated_critical_defect_evaluation": {"type": "string"}
+          }
         },
         "publicness_score": {
           "type": "number",
           "description": "공공성 점수",
           "minimum": 0,
-          "maximum": 15
+          "maximum": 10
         },
         "publicness_evaluation": {
           "type": "string",
-          "description": "공공성 평가 근거"
+          "description": "공공성 평가 근거 (인구수, 인구밀도 기준)"
         },
         "security_score": {
           "type": "number",
           "description": "보안성 점수",
           "minimum": 0,
-          "maximum": 10
+          "maximum": 5
         },
         "security_evaluation": {
           "type": "string",
@@ -237,16 +325,80 @@
           "type": "string",
           "description": "신기술성 평가 근거"
         },
+        "total_score_a": {
+          "type": "number",
+          "description": "A항목 총점 (안전관리 필요성)",
+          "minimum": 0,
+          "maximum": 80
+        },
+        "compliance_score": {
+          "type": "number",
+          "description": "안전의무 이행 점수 (B-1)",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "compliance_breakdown": {
+          "type": "object",
+          "description": "안전의무 이행 세부 점수",
+          "properties": {
+            "inspection_compliance_score": {
+              "type": "number",
+              "description": "법정 안전점검 및 성능평가 이행 및 결과 제출",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "inspection_compliance_evaluation": {"type": "string"},
+            "management_plan_score": {
+              "type": "number",
+              "description": "시설물 안전 및 유지관리 계획 적기 제출",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "management_plan_evaluation": {"type": "string"}
+          }
+        },
+        "quality_score": {
+          "type": "number",
+          "description": "안전성과 관리의 전문성 점수 (B-2)",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "quality_breakdown": {
+          "type": "object",
+          "description": "안전성과 관리의 전문성 세부 점수",
+          "properties": {
+            "inadequacy_score": {
+              "type": "number",
+              "description": "점검 및 진단보고서 평가결과의 부적정",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "inadequacy_evaluation": {"type": "string"},
+            "correction_score": {
+              "type": "number",
+              "description": "점검 및 진단보고서 평가결과의 시정",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "correction_evaluation": {"type": "string"}
+          }
+        },
+        "total_score_b": {
+          "type": "number",
+          "description": "B항목 총점 (관리주체 안전관리 역량)",
+          "minimum": 0,
+          "maximum": 20
+        },
         "total_score": {
           "type": "number",
-          "description": "총점",
+          "description": "총점 (A+B)",
           "minimum": 0,
-          "maximum": 70
+          "maximum": 100
         },
         "total_score_out_of": {
           "type": "number",
           "description": "만점 기준",
-          "const": 70
+          "const": 100
         },
         "evaluation_grade": {
           "type": "string",
@@ -287,7 +439,8 @@
     },
     "evaluation_criteria_version": {
       "type": "string",
-      "description": "적용한 평가기준 버전"
+      "description": "적용한 평가기준 버전",
+      "const": "수정된 평가항목 및 세부배점 (2025.11.19 최종)"
     },
     "data_sources": {
       "type": "array",
